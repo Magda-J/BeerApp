@@ -5,10 +5,9 @@ const testEnv = require('dotenv').config()
 
 const jokeAPIKEY = process.env.JOKES_KEY;
 console.log(jokeAPIKEY)
+
 //API code
 const axios = require('axios');
-
-
 
 
 const getRandom = async () => {
@@ -32,11 +31,7 @@ const getRandom = async () => {
   
 };
 
-
-//API code
-
-
-
+//End of API code
 
 
 exports.getAllBeers =(req, res, next) => {
