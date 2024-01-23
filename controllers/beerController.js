@@ -1,6 +1,8 @@
 const createError = require('http-errors')
 const uuid = require('uuid');
 const beers = []
+const testEnv = require('dotenv').config()
+
 const jokeAPIKEY = process.env.JOKES_KEY;
 console.log(jokeAPIKEY)
 //API code
