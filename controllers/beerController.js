@@ -1,26 +1,33 @@
 const createError = require('http-errors')
 const uuid = require('uuid');
 const beers = []
-
+const jokeAPIKEY = process.env.JOKES_KEY;
+console.log(jokeAPIKEY)
 //API code
 const axios = require('axios');
 
+
+
+
 const getRandom = async () => {
+    
   const options = {
     method: 'GET',
-    url: 'https://beers-list.p.rapidapi.com/beers/italy',
-    headers: {
-        'X-RapidAPI-Key': '430d779416msh14041268c4b055ap189d6fjsnc7968c742819',
-        'X-RapidAPI-Host': 'beers-list.p.rapidapi.com'
+    url: 'https://dad-jokes.p.rapidapi.com/random/joke/png',
+  headers: {
+    'X-RapidAPI-Key': jokeAPIKEY,
+    'X-RapidAPI-Host': 'dad-jokes.p.rapidapi.com'
     }
   };
 
   try {
     const response = await axios.request(options);
-    return response.data;
+    // const beerJokes = response.filter(x => x.body.data.type === 'drug')
+    return `${response.data.body.setup} ${response.data.body.punchline}`;
   } catch (error) {
     throw error;
   }
+  
 };
 
 
@@ -29,22 +36,32 @@ const getRandom = async () => {
 
 
 
+
 exports.getAllBeers =(req, res, next) => {
+    
     res.send(beers)
 }
 
-exports.createBeer = (req, res, next) => {
-    // if (req.headers?.secretstring !== 'password123') return next(createError(401, 'You are not authorised to create a beer'))
-    const isMissingInformation = !req.body.name || !req.body.type || !req.body.alcohol || !req.body.origin || !req.body.rating
+exports.createBeer = async (req, res, next) => {
+    const isMissingInformation = !req.body.name || !req.body.type || !req.body.alcohol || !req.body.origin || !req.body.rating;
     if (isMissingInformation) return next(createError(400, 'Please fill out all of the fields.'));
-
+  
     const beerId = uuid.v4();
     req.body.id = beerId;
-    // const beerJoke = getBeerJoke()
-
-    beers.push(req.body)
-    res.send(beers)
-}
+  
+    try {
+      // Call the getRandom function to get a random beer
+      const randomBeer = await getRandom();
+  
+      // Add the random beer data to the beers array
+      beers.push({ ...req.body, random_joke: randomBeer });
+  
+      // Send the updated beers array in the response
+      res.send(beers);
+    } catch (error) {
+      next(createError(500, 'Error creating beer.'));
+    }
+  };
 
 exports.deleteBeer = (req, res, next) => {
     const beerId = String(req.params.id);
@@ -102,20 +119,10 @@ exports.findBeer = (req, res, next) => {
         return next(createError(404, 'Cannot find the beer.'));
     }
 
-    // Choose the beer based on the first match found
-    // const foundBeer = beerIndex !== -1 ? beers[beerIndex] : beerN || beerT || beerO || beerA || beerR
 
     res.send(filteredBeers)
 };
 
 
-
-
-// axios.post("http://localhostL3000/create", {
-//     name: "Learn Node",
-//     type: "2021-12-31",
-//     alcohol "Easy"
-//      
-// })
 
 
