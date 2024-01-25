@@ -16,27 +16,37 @@ const Beer = require("../models/beer")
 //API code
 const axios = require('axios');
 
-
-const getRandom = async () => {
-    
-  const options = {
-    method: 'GET',
-    url: 'https://dad-jokes.p.rapidapi.com/random/joke/png',
+const options = {
+  method: 'GET',
+  url: 'https://random-words5.p.rapidapi.com/getMultipleRandom',
+  params: { count: '5' },
   headers: {
     'X-RapidAPI-Key': jokeAPIKEY,
-    'X-RapidAPI-Host': 'dad-jokes.p.rapidapi.com'
-    }
-  };
+    'X-RapidAPI-Host': 'random-words5.p.rapidapi.com'
+  }
+};
 
+async function getRandomWords() {
   try {
     const response = await axios.request(options);
-   
-    return `${response.data.body.setup} ${response.data.body.punchline}`;
+    
+    // Assuming the response is an array of words
+    const words = response.data;
+
+    // Access each word in the array
+    // words.forEach((word, index) => {
+    //   console.log(`Word ${index + 1}: ${word}`);
+    // });
+
+    return words;
   } catch (error) {
     throw error;
   }
-  
-};
+}
+
+// Call the function
+getRandomWords();
+
 
 //End of API code
 
@@ -55,8 +65,13 @@ exports.createBeer = async function (req, res, next) {
     if (!req.body.name || !req.body.type || !req.body.alcohol || !req.body.origin || !req.body.rating) {
       return next(createError(400, "All fields required"));
     }
-// Call the getRandom function to get a random beer
-      // const randomBeer = await getRandom();
+
+     // Get random words
+     const words = await getRandomWords();
+
+     // Use the first word as a property for the new beer
+     const randomWord = words[0];
+     
 
     const beerItem = new Beer({
       name: req.body.name,
@@ -64,15 +79,10 @@ exports.createBeer = async function (req, res, next) {
       origin: req.body.origin,
       alcohol: req.body.alcohol,
       rating: req.body.rating,
-      // random_joke: randomBeer
+      description: randomWord
     });
 
-
- 
   
-      
-
-
     await beerItem.save();
 
     res.send(beerItem);
